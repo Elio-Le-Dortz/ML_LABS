@@ -29,11 +29,7 @@ class KNN(object):
         Returns:
             pred_labels (np.array): labels of shape (N,)
         """
-        self.mean = np.mean(training_data, axis=0)
-        self.std = np.std(training_data, axis=0)
-        self.std[self.std == 0] = 1
-        
-        self.training_data = (training_data - self.mean) / self.std
+        self.training_data = training_data 
         self.training_labels = training_labels
         
         return self.predict(training_data)
@@ -59,11 +55,6 @@ class KNN(object):
         Returns:
             test_labels (np.array): labels of shape (N,)
         """
-        ##
-        ###
-        #### YOUR CODE HERE!
-        ###
-        ##
-        test_data_normalized = (test_data - self.mean) / self.std
-        k_nn = [self.predictOne(sample) for sample in test_data_normalized]
+ 
+        k_nn = [self.predictOne(sample) for sample in test_data]
         return np.array(k_nn)

@@ -35,10 +35,12 @@ def main(args):
 
     ## 2. Then we must prepare it. This is where you can create a validation set,
     #  normalize, add bias, etc.
-        mean = np.mean(train_features, axis=0) 
-        std = np.std(train_features, axis=0)
-        std[self.std == 0] = 1
-    normalized_data = (train_features - mean)/std  ##Normalization of the training data.
+    means = np.mean(train_features, axis = 0)
+    std = np.std(train_features, axis = 0)
+    std[std==0] = 1
+    train_features = normalize_fn(train_features, means, std)  ##Normalization of the training data.
+    test_features = normalize_fn(test_features,means,std)     ##Normalization of the test data.
+    
     # Make a validation set (it can overwrite xtest, ytest)
     if not args.test:
         ### WRITE YOUR CODE HERE
@@ -50,11 +52,10 @@ def main(args):
 
     # Follow the "DummyClassifier" example for your methods
     if args.method == "dummy_classifier":
-        method_obj = DummyClassifier(arg1=1, arg2=2)
+        method_obj  = DummyClassifier(arg1=1, arg2=2)
 
     elif args.method == "knn":
-        ### WRITE YOUR CODE HERE
-        pass
+        method_obj = KNN(args.K,args.task)
 
     elif args.method == "logistic_regression":
         ### WRITE YOUR CODE HERE
