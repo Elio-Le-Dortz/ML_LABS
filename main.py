@@ -58,8 +58,7 @@ def main(args):
         method_obj = KNN(args.K,args.task)
 
     elif args.method == "logistic_regression":
-        ### WRITE YOUR CODE HERE
-        pass
+        method_obj = LogisticRegression(args.lr,args.max_iters)
 
     elif args.method == "linear_regression":
         ### WRITE YOUR CODE HERE
