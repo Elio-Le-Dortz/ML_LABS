@@ -175,6 +175,12 @@ if __name__ == "__main__":
         default=0,
         help="regularization parameter for linear regression",
     )
+
+    parser.add_argument("--kfold",
+                        type = int,
+                        default = 1,
+                        help = "use kfold by separating the train data into k number of group of validation set",
+                       )
     # Feel free to add more arguments here if you need!
 
     args = parser.parse_args()
