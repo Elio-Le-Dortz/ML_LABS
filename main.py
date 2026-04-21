@@ -40,13 +40,17 @@ def main(args):
     std[std==0] = 1
     train_features = normalize_fn(train_features, means, std)  ##Normalization of the training data.
     test_features = normalize_fn(test_features,means,std)     ##Normalization of the test data.
-    
+
     # Make a validation set (it can overwrite xtest, ytest)
     if not args.test:
         ### WRITE YOUR CODE HERE
         pass
 
     ### WRITE YOUR CODE HERE to do any other data processing
+    if(args.method != "knn"):
+        train_features = append_bias_term(train_features)
+        test_features = append_bias_term(test_features)
+    
 
     ## 3. Initialize the method you want to use.
 
@@ -61,7 +65,7 @@ def main(args):
         method_obj = LogisticRegression(args.lr,args.max_iters)
 
     elif args.method == "linear_regression":
-        ### WRITE YOUR CODE HERE
+        method_obj = LinearRegression()
         pass
 
     else:

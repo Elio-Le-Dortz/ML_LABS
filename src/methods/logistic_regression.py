@@ -20,7 +20,6 @@ class LogisticRegression(object):
         self.lr = lr
         self.max_iters = max_iters
         self.W = None
-        self.b = None
     
     def _softmax(self, z):
         """
@@ -41,24 +40,25 @@ class LogisticRegression(object):
         Returns:
             pred_labels (np.array): target of shape (N,)
         """
+
+        #bias term is handled in main.py
+        
         N, D = training_data.shape
         C = get_n_classes(training_labels)
 
         y_onehot = label_to_onehot(training_labels, C)
 
         self.W = np.zeros((D, C))
-        self.b = np.zeros((1, C))
 
         for _ in range(self.max_iters):
-            scores = training_data @ self.W + self.b
+            scores = training_data @ self.W
             probs = self._softmax(scores)
 
             grad_W = (training_data.T @ (probs - y_onehot)) / N
             grad_b = np.sum(probs - y_onehot, axis=0, keepdims=True) / N
 
             self.W -= self.lr * grad_W
-            self.b -= self.lr * grad_b
-        pred_probs = self._softmax(training_data @ self.W + self.b)
+        pred_probs = self._softmax(training_data @ self.W)
         pred_labels = onehot_to_label(pred_probs)
 
         return pred_labels
@@ -72,7 +72,7 @@ class LogisticRegression(object):
         Returns:
             pred_labels (np.array): labels of shape (N,)
         """
-        scores = test_data @ self.W + self.b
+        scores = test_data @ self.W
         probs = self._softmax(scores)
         pred_labels = onehot_to_label(probs)
 
