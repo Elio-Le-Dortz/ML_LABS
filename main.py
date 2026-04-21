@@ -41,32 +41,67 @@ def main(args):
     train_features = normalize_fn(train_features, means, std)  ##Normalization of the training data.
     test_features = normalize_fn(test_features,means,std)     ##Normalization of the test data.
 
-    # Make a validation set (it can overwrite xtest, ytest)
+    ### WRITE YOUR CODE HERE to do any other data processing
+    if args.method != "knn":
+        train_features = append_bias_term(train_features)
+        test_features = append_bias_term(test_features)
+
+    ## 3. K-Fold cross-validation (when not evaluating on test set)
+
     if not args.test:
         n_samples = train_features.shape[0]
         indices = np.random.permutation(n_samples)
-        nb_data = int(0.8*n_samples)
-        train_index = indices[:nb_data]
-        validation_index = indices[nb_data:]
+        fold_size = n_samples // args.n_folds
 
-        test_features= train_features[validation_index]
-        test_labels_reg= train_labels_reg[validation_index]
-        test_labels_classif =  train_labels_classif[validation_index]
-        
-        train_features = train_features[train_index]
-        train_labels_reg = train_labels_reg[train_index]
-        train_labels_classif = train_labels_classif[train_index]
+        cv_accs, cv_f1s, cv_mses = [], [], []
 
-        
-        
+        for fold in range(args.n_folds):
+            val_start = fold * fold_size
+            val_end = val_start + fold_size if fold < args.n_folds - 1 else n_samples
 
-    ### WRITE YOUR CODE HERE to do any other data processing
-    if(args.method != "knn"):
-        train_features = append_bias_term(train_features)
-        test_features = append_bias_term(test_features)
-    
+            val_idx   = indices[val_start:val_end]
+            train_idx = np.concatenate([indices[:val_start], indices[val_end:]])
 
-    ## 3. Initialize the method you want to use.
+            fold_train_X          = train_features[train_idx]
+            fold_val_X            = train_features[val_idx]
+            fold_train_y_reg      = train_labels_reg[train_idx]
+            fold_val_y_reg        = train_labels_reg[val_idx]
+            fold_train_y_classif  = train_labels_classif[train_idx]
+            fold_val_y_classif    = train_labels_classif[val_idx]
+
+            if args.method == "dummy_classifier":
+                method_obj = DummyClassifier(arg1=1, arg2=2)
+            elif args.method == "knn":
+                method_obj = KNN(args.K, args.task)
+            elif args.method == "logistic_regression":
+                method_obj = LogisticRegression(args.lr, args.max_iters)
+            elif args.method == "linear_regression":
+                method_obj = LinearRegression(args.regularization_param)
+            else:
+                raise ValueError(f"Unknown method: {args.method}")
+
+            if args.task == "classification":
+                assert args.method != "linear_regression", f"You should use linear regression as a regression method"
+                method_obj.fit(fold_train_X, fold_train_y_classif)
+                preds = method_obj.predict(fold_val_X)
+                cv_accs.append(accuracy_fn(preds, fold_val_y_classif))
+                cv_f1s.append(macrof1_fn(preds, fold_val_y_classif))
+            elif args.task == "regression":
+                assert args.method != "logistic_regression", f"You should use logistic regression as a classification method"
+                method_obj.fit(fold_train_X, fold_train_y_reg)
+                preds = method_obj.predict(fold_val_X)
+                cv_mses.append(mse_fn(preds, fold_val_y_reg))
+            else:
+                raise ValueError(f"Unknown task: {args.task}")
+
+        if args.task == "classification":
+            print(f"\n{args.n_folds}-Fold CV: accuracy = {np.mean(cv_accs):.3f}% - F1-score = {np.mean(cv_f1s):.6f}")
+        elif args.task == "regression":
+            print(f"\n{args.n_folds}-Fold CV: MSE = {np.mean(cv_mses):.6f}")
+
+        return
+
+    ## 4. Initialize the method and train/evaluate on the test set
 
     # Follow the "DummyClassifier" example for your methods
     if args.method == "dummy_classifier":
@@ -80,12 +115,9 @@ def main(args):
 
     elif args.method == "linear_regression":
         method_obj = LinearRegression(args.regularization_param)
-        pass
 
     else:
         raise ValueError(f"Unknown method: {args.method}")
-
-    ## 4. Train and evaluate the method
 
     if args.task == "classification":
         assert args.method != "linear_regression", f"You should use linear regression as a regression method"
@@ -95,7 +127,7 @@ def main(args):
         # Predict on unseen data
         preds = method_obj.predict(test_features)
 
-        # Report results: performance on train and valid/test sets
+        # Report results: performance on train and test sets
         acc = accuracy_fn(preds_train, train_labels_classif)
         macrof1 = macrof1_fn(preds_train, train_labels_classif)
         print(f"\nTrain set: accuracy = {acc:.3f}% - F1-score = {macrof1:.6f}")
@@ -112,7 +144,7 @@ def main(args):
         # Predict on unseen data
         preds = method_obj.predict(test_features)
 
-        # Report results: MSE on train and valid/test sets
+        # Report results: MSE on train and test sets
         train_mse = mse_fn(preds_train, train_labels_reg)
         print(f"\nTrain set: MSE = {train_mse:.6f}")
 
@@ -176,10 +208,10 @@ if __name__ == "__main__":
         help="regularization parameter for linear regression",
     )
 
-    parser.add_argument("--kfold",
-                        type = int,
-                        default = 1,
-                        help = "use kfold by separating the train data into k number of group of validation set",
+    parser.add_argument("--n_folds",
+                        type=int,
+                        default=5,
+                        help="number of folds for cross-validation (used when --test is not set)",
                        )
     # Feel free to add more arguments here if you need!
 

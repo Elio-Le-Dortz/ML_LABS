@@ -37,7 +37,8 @@ class KNN(object):
         
     def predictOne(self, test_sample):
         distances = np.linalg.norm(test_sample-self.training_data, axis=1)
-        indices = np.argpartition(distances,self.k)[0:self.k]
+        k = min(self.k, len(distances))
+        indices = np.argpartition(distances, k)[0:k]
         if (self.task_kind == "classification"):
             bins = np.bincount(self.training_labels[indices].astype(int))
             return np.argmax(bins)

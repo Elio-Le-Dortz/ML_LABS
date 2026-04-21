@@ -55,8 +55,6 @@ class LogisticRegression(object):
             probs = self._softmax(scores)
 
             grad_W = (training_data.T @ (probs - y_onehot)) / N
-            grad_b = np.sum(probs - y_onehot, axis=0, keepdims=True) / N
-
             self.W -= self.lr * grad_W
         pred_probs = self._softmax(training_data @ self.W)
         pred_labels = onehot_to_label(pred_probs)
