@@ -1,5 +1,6 @@
 import argparse
 import numpy as np
+import matplotlib.pyplot as plt
 
 from src.methods.dummy_methods import DummyClassifier
 from src.methods.logistic_regression import LogisticRegression
@@ -155,6 +156,30 @@ def main(args):
         raise ValueError(f"Unknown task: {args.task}")
 
     ### WRITE YOUR CODE HERE if you want to add other outputs, visualization, etc.
+
+    if args.test and args.task == "classification":
+        class_names = ["Low", "Medium", "High"]
+        n_classes = len(class_names)
+        cm = np.zeros((n_classes, n_classes), dtype=int)
+        for t, p in zip(test_labels_classif, preds):
+            cm[int(t), int(p)] += 1
+
+        fig, ax = plt.subplots()
+        im = ax.imshow(cm, cmap="Blues")
+        plt.colorbar(im, ax=ax)
+        ax.set_xticks(range(n_classes))
+        ax.set_yticks(range(n_classes))
+        ax.set_xticklabels(class_names)
+        ax.set_yticklabels(class_names)
+        ax.set_xlabel("Predicted")
+        ax.set_ylabel("True")
+        ax.set_title(f"Confusion Matrix — {args.method}")
+        for i in range(n_classes):
+            for j in range(n_classes):
+                ax.text(j, i, cm[i, j], ha="center", va="center",
+                        color="white" if cm[i, j] > cm.max() / 2 else "black")
+        plt.tight_layout()
+        plt.show()
 
 
 if __name__ == "__main__":
