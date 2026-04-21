@@ -43,8 +43,22 @@ def main(args):
 
     # Make a validation set (it can overwrite xtest, ytest)
     if not args.test:
-        ### WRITE YOUR CODE HERE
-        pass
+        n_samples = train_features.shape[0]
+        indices = np.random.permutation(n_samples)
+        nb_data = int(0.8*n_samples)
+        train_index = indices[:nb_data]
+        validation_index = indices[nb_data:]
+
+        test_features= train_features[validation_index]
+        test_labels_reg= train_labels_reg[validation_index]
+        test_labels_classif =  train_labels_classif[validation_index]
+        
+        train_features = train_features[train_index]
+        train_labels_reg = train_labels_reg[train_index]
+        train_labels_classif = train_labels_classif[train_index]
+
+        
+        
 
     ### WRITE YOUR CODE HERE to do any other data processing
     if(args.method != "knn"):
@@ -161,6 +175,12 @@ if __name__ == "__main__":
         default=0,
         help="regularization parameter for linear regression",
     )
+
+    parser.add_argument("--kfold",
+                        type = int,
+                        default = 1,
+                        help = "use kfold by separating the train data into k number of group of validation set",
+                       )
     # Feel free to add more arguments here if you need!
 
     args = parser.parse_args()
