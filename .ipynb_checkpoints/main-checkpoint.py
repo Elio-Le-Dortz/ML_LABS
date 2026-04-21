@@ -40,13 +40,31 @@ def main(args):
     std[std==0] = 1
     train_features = normalize_fn(train_features, means, std)  ##Normalization of the training data.
     test_features = normalize_fn(test_features,means,std)     ##Normalization of the test data.
-    
+
     # Make a validation set (it can overwrite xtest, ytest)
     if not args.test:
-        ### WRITE YOUR CODE HERE
-        pass
+        n_samples = train_features.shape[0]
+        indices = np.random.permutation(n_samples)
+        nb_data = int(0.8*n_samples)
+        train_index = indices[:nb_data]
+        validation_index = indices[nb_data:]
+
+        test_features= train_features[validation_index]
+        test_labels_reg= train_labels_reg[validation_index]
+        test_labels_classif =  train_labels_classif[validation_index]
+        
+        train_features = train_features[train_index]
+        train_labels_reg = train_labels_reg[train_index]
+        train_labels_classif = train_labels_classif[train_index]
+
+        
+        
 
     ### WRITE YOUR CODE HERE to do any other data processing
+    if(args.method != "knn"):
+        train_features = append_bias_term(train_features)
+        test_features = append_bias_term(test_features)
+    
 
     ## 3. Initialize the method you want to use.
 
@@ -58,11 +76,10 @@ def main(args):
         method_obj = KNN(args.K,args.task)
 
     elif args.method == "logistic_regression":
-        ### WRITE YOUR CODE HERE
-        pass
+        method_obj = LogisticRegression(args.lr,args.max_iters)
 
     elif args.method == "linear_regression":
-        ### WRITE YOUR CODE HERE
+        method_obj = LinearRegression(args.regularization_param)
         pass
 
     else:
@@ -151,6 +168,12 @@ if __name__ == "__main__":
         action="store_true",
         help="train on whole training data and evaluate on the test data, "
              "otherwise use a validation set",
+    )
+    parser.add_argument(
+        "--regularization_param",
+        type=float,
+        default=0,
+        help="regularization parameter for linear regression",
     )
     # Feel free to add more arguments here if you need!
 

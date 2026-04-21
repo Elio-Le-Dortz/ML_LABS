@@ -43,8 +43,22 @@ def main(args):
 
     # Make a validation set (it can overwrite xtest, ytest)
     if not args.test:
-        ### WRITE YOUR CODE HERE
-        pass
+        n_samples = train_features.shape[0]
+        indices = np.random.permutation(n_samples)
+        nb_data = int(0.8*n_samples)
+        train_index = indices[:nb_data]
+        validation_index = indices[nb_data:]
+
+        test_features= train_features[validation_index]
+        test_labels_reg= train_labels_reg[validation_index]
+        test_labels_classif =  train_labels_classif[validation_index]
+        
+        train_features = train_features[train_index]
+        train_labels_reg = train_labels_reg[train_index]
+        train_labels_classif = train_labels_classif[train_index]
+
+        
+        
 
     ### WRITE YOUR CODE HERE to do any other data processing
     if(args.method != "knn"):
