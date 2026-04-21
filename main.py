@@ -65,7 +65,7 @@ def main(args):
         method_obj = LogisticRegression(args.lr,args.max_iters)
 
     elif args.method == "linear_regression":
-        method_obj = LinearRegression()
+        method_obj = LinearRegression(args.regularization_param)
         pass
 
     else:
@@ -154,6 +154,12 @@ if __name__ == "__main__":
         action="store_true",
         help="train on whole training data and evaluate on the test data, "
              "otherwise use a validation set",
+    )
+    parser.add_argument(
+        "--regularization_param",
+        type=float,
+        default=0,
+        help="regularization parameter for linear regression",
     )
     # Feel free to add more arguments here if you need!
 

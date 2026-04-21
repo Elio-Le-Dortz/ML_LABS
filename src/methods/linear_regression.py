@@ -6,11 +6,14 @@ class LinearRegression(object):
     Linear regression.
     """
 
-    def __init__(self):
+    def __init__(self, regularization_param = 0):
         """
         Initialize the new object (see dummy_methods.py)
         and set its arguments.
         """
+        self.W = None
+        self.regParam = regularization_param
+
 
     def fit(self, training_data, training_labels):
         """
@@ -25,11 +28,11 @@ class LinearRegression(object):
         Returns:
             pred_labels (np.array): target of shape (N,)
         """
-        ##
-        ###
-        #### WRITE YOUR CODE HERE!
-        ###
-        ##
+        #bias term handled in main.py
+        N, D = training_data.shape
+        self.W = np.linalg.inv((training_data.T @ training_data) + self.regParam*np.identity(D)) @ (training_data.T @ training_labels)
+        pred_labels = training_data @ self.W
+
         return pred_labels
 
     def predict(self, test_data):
@@ -41,9 +44,5 @@ class LinearRegression(object):
         Returns:
             pred_labels (np.array): labels of shape (N,)
         """
-        ##
-        ###
-        #### WRITE YOUR CODE HERE!
-        ###
-        ##
+        pred_labels = test_data @ self.W
         return pred_labels
